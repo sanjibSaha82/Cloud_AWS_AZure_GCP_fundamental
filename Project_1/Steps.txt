@@ -1,0 +1,84 @@
+Step 1 — Create an Amazon S3 bucket
+
+1)Open the Amazon S3 Console.
+2)Click Create bucket.
+3)Enter a globally unique bucket name, for example my-static-site-2026-demo-12345.
+4)Choose an AWS Region, such as ap-south-1 (Mumbai).
+5)Keep Block all public access enabled.
+6)Leave the default encryption settings enabled.
+7)Click Create bucket.
+
+Step 2 — Upload your website
+1)Open your newly created bucket.
+2)Select Upload → Add files.
+3)Select index.html and style.css.
+4)Click Upload.
+
+Step 3 — Create a CloudFront distribution
+1)CloudFront Console → Distributions → Create distribution
+2)Distribution name: ecommerce-distribution
+3)istribution type: Single website or app -> Next
+4)Origin type: Amazon S3
+5)Origin: Select your frontend s3 bucket
+6)Settings: Allow private S3 bucket access to CloudFront - Recommended
+7)Settings: Use recommended cache settings tailored to serving S3 content -> Next
+8)Enable Security: Select "Do not enable security protections"
+9)Create distribution
+
+Check S3 Bucket Policy to allow access to CloudFront distribution
+After creating the distribution, CloudFront automatically updates S3 bucket policy with something like following. Verify your S3 bucket policy.
+
+Example:
+
+{
+    "Version": "2008-10-17",
+    "Id": "PolicyForCloudFrontPrivateContent",
+    "Statement": [
+        {
+            "Sid": "AllowCloudFrontServicePrincipal",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::ecommerce-frontend-chetanag/*",
+            "Condition": {
+                "ArnLike": {
+                    "AWS:SourceArn": "arn:aws:cloudfront::387258180757:distribution/E2P87PZZ9MQ3KE"
+                }
+            }
+        }
+    ]
+}
+If you don't see S3 Bucket policy updated, then modify the policy as per your AWS Account, S3 Bucket Name and CloudFront Distribution ID.
+
+
+Step 4 — Test your website using CloudFront
+1)Open your CloudFront distribution.
+2) Copy its Distribution domain name, which looks like d123456abcdef.cloudfront.net.
+3) Open this URL in your browser:
+
+Step 5 — Configure Route 53 for your custom domain
+This step is optional if the CloudFront URL is sufficient.
+
+A. Create or open a hosted zone
+1. Open the Amazon Route 53 Console.
+2. Select Hosted zones.
+3. If your domain is registered with Route 53, open its existing hosted zone.
+4. If your domain is registered elsewhere, create a public hosted zone for it and update the domain registrar's nameservers to the Route 53 nameservers.
+B. Create the DNS record
+Inside your hosted zone, select Create record.
+
+For www.example.com, use these settings:
+Field	Value
+Record name	www
+Record type	A
+Alias	Enabled
+Route traffic to	Alias to CloudFront distribution
+Distribution	Select your distribution
+Evaluate target health	No
+
+Create the record.
+
+If you also want example.com to work, create a separate root-domain A alias record with the record name left blank. 
+You can also create AAAA alias records for IPv6 if required.
