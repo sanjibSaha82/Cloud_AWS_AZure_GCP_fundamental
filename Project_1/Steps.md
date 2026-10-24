@@ -1,3 +1,8 @@
+
+
+<img width="828" height="393" alt="IMAGE" src="https://github.com/user-attachments/assets/5c6b941c-35ae-42e9-b8af-8323c8d680d5" />
+
+
 Step 1 — Create an Amazon S3 bucket
 
 1)Open the Amazon S3 Console.
